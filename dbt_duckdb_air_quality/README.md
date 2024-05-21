@@ -40,7 +40,7 @@ FROM
     {{ source('external_source', 'who_ambient_air_quality_database_version_v6_april_2023') }}
 ~~~
 
-### Core Model
+### Data Marts
 
 The core model uses the staging table to create various structured queries that provide insights into air quality.
 
@@ -107,25 +107,27 @@ ORDER BY
 
 4. **Top 10 Cities with the Highest PM2.5 Concentration:**
 ~~~sql
+WITH latest_year AS (
+    SELECT MAX(year) AS year
+    FROM {{ ref('stg_air_quality') }}
+)
 SELECT 
+    city, 
     country_name, 
-    year, 
-    AVG(pm25_concentration) AS avg_pm25, 
-    AVG(pm10_concentration) AS avg_pm10, 
-    AVG(no2_concentration) AS avg_no2,
-    CASE
-        WHEN AVG(pm25_concentration) <= 10 AND AVG(pm10_concentration) <= 20 AND AVG(no2_concentration) <= 40 THEN 'Good'
-        WHEN AVG(pm25_concentration) > 10 AND AVG(pm10_concentration) > 20 AND AVG(no2_concentration) > 40 THEN 'Poor'
-        ELSE 'Moderate'
-    END as air_quality_rating
+    stg_air_quality.year, 
+    AVG(pm25_concentration) AS avg_pm25 
 FROM 
-    {{ ref('stg_air_quality') }}
+    {{ ref('stg_air_quality') }},
+    latest_year
+WHERE 
+    stg_air_quality.year = latest_year.year
 GROUP BY 
+    city, 
     country_name, 
-    year
+    stg_air_quality.year
 ORDER BY 
-    country_name, 
-    year
+    avg_pm25 DESC
+LIMIT 10
 ~~~
 
 5. **Air Quality Trends in Major Cities:**
