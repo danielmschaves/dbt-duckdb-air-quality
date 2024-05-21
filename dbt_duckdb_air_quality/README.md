@@ -1,5 +1,7 @@
 # Air Quality Analysis with dbt and DuckDB
 
+![Pipeline](https://github.com/danielmschaves/dbt-duckdb-air-quality/blob/main/dbt-pipeline.png)
+
 ## Overview
 
 This project leverages dbt (data build tool) and DuckDB to analyze air quality data sourced from the World Health Organization (WHO). The goal is to create a structured data model that provides insights into air quality trends, comparisons, and rankings across various cities and countries.
